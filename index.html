@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나를 지키는 건강 지식 퀴즈 🧠</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --coral:#FF6B6B;--coral-light:#FFF0F0;--coral-dark:#E05555;
+  --mint:#4ECDC4;--mint-light:#E8FAF9;--mint-dark:#38B2AA;
+  --peach:#FFB347;--peach-light:#FFF5E6;
+  --sky:#74C0FC;--sky-light:#EBF6FF;
+  --lavender:#C3B1E1;--lavender-light:#F5F0FF;
+  --bg:#FFF9F5;--card:#FFFFFF;
+  --text:#2D2D2D;--text2:#666;--text3:#999;
+  --shadow:0 4px 20px rgba(0,0,0,0.08);
+  --shadow2:0 2px 8px rgba(0,0,0,0.06);
+  --radius:20px;--radius2:14px;--radius3:10px;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;padding:0 0 40px}
+.screen.active{display:block}
+.bubble{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 24px;margin:0 16px 16px}
+.char{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto;flex-shrink:0}
+.talk-box{background:var(--card);border-radius:0 var(--radius) var(--radius) var(--radius);border:2px solid #F0E8FF;padding:16px 18px;position:relative;line-height:1.7;font-size:15px;color:var(--text)}
+.talk-box::before{content:'';position:absolute;left:-2px;top:-2px;width:14px;height:14px;background:#F0E8FF;clip-path:polygon(0 0,100% 0,0 100%);border-radius:2px 0 0 0}
+.btn{border:none;border-radius:50px;padding:14px 28px;font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;width:100%}
+.btn-primary{background:linear-gradient(135deg,var(--coral),#FF8E53);color:#fff;box-shadow:0 4px 15px rgba(255,107,107,0.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,107,107,0.45)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:#fff;color:var(--text2);border:2px solid #EEE}
+.btn-secondary:hover{border-color:var(--coral);color:var(--coral)}
+.progress-bar{height:8px;background:#F0F0F0;border-radius:4px;overflow:hidden;margin:8px 0 16px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--coral),#FF8E53);border-radius:4px;transition:width .4s ease}
+.q-num{font-size:13px;color:var(--text3);font-weight:500;margin-bottom:4px}
+.q-text{font-size:17px;font-weight:700;line-height:1.5;margin-bottom:20px;color:var(--text)}
+.opt-btn{width:100%;text-align:left;background:#fff;border:2px solid #EEE;border-radius:var(--radius3);padding:14px 16px;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;margin-bottom:10px;display:flex;align-items:center;gap:10px;color:var(--text)}
+.opt-btn:hover{border-color:var(--coral);background:var(--coral-light);transform:translateX(3px)}
+.opt-btn.correct{border-color:#4CAF50;background:#E8F5E9;color:#2E7D32}
+.opt-btn.wrong{border-color:var(--coral);background:var(--coral-light);color:var(--coral-dark)}
+.opt-btn.disabled{pointer-events:none;opacity:.6}
+.opt-letter{width:28px;height:28px;border-radius:50%;background:#F5F5F5;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:.18s}
+.opt-btn.correct .opt-letter{background:#4CAF50;color:#fff}
+.opt-btn.wrong .opt-letter{background:var(--coral);color:#fff}
+.feedback-box{border-radius:var(--radius3);padding:14px 16px;margin-top:4px;font-size:14px;font-weight:500;line-height:1.6;display:none}
+.feedback-box.show{display:block}
+.feedback-correct{background:#E8F5E9;color:#2E7D32;border:1.5px solid #A5D6A7}
+.feedback-wrong{background:var(--coral-light);color:var(--coral-dark);border:1.5px solid #FFCDD2}
+.score-circle{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--coral),#FF8E53);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;color:#fff;box-shadow:0 8px 25px rgba(255,107,107,0.35)}
+.score-num{font-size:40px;font-weight:900;line-height:1}
+.score-total{font-size:14px;opacity:.85;margin-top:2px}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.topic-card{background:#fff;border-radius:var(--radius2);border:2px solid #EEE;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s}
+.topic-card:hover{border-color:var(--coral);transform:translateY(-2px);box-shadow:var(--shadow2)}
+.topic-card.selected{border-color:var(--coral);background:var(--coral-light)}
+.topic-icon{font-size:30px;margin-bottom:6px}
+.topic-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.4}
+.topic-tag{font-size:11px;color:var(--text3);margin-top:3px}
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #F5F5F5}
+.check-item:last-child{border-bottom:none}
+.check-q{font-size:14px;font-weight:500;color:var(--text);flex:1;line-height:1.5}
+.check-opts{display:flex;gap:8px;margin-top:8px;flex-shrink:0}
+.check-opt{padding:6px 14px;border:2px solid #EEE;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;transition:.15s;font-family:'Noto Sans KR',sans-serif}
+.check-opt:hover{border-color:var(--coral)}
+.check-opt.sel-yes{border-color:var(--coral);background:var(--coral-light);color:var(--coral-dark)}
+.check-opt.sel-no{border-color:var(--sky);background:var(--sky-light);color:#1565C0}
+.check-num{font-size:22px}
+.result-msg{font-size:16px;font-weight:700;text-align:center;line-height:1.6;color:var(--text);white-space:pre-line}
+.pledge-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #FFF0F0}
+.pledge-item:last-child{border-bottom:none}
+.pledge-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--coral),#FF8E53);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.pledge-text{font-size:14px;line-height:1.6;color:var(--text)}
+.sign-box{border:2px dashed #FFB3B3;border-radius:var(--radius2);padding:18px;text-align:center;margin-top:4px;background:#FFF9F9}
+.name-input{border:2px solid #FFD0D0;border-radius:10px;padding:10px 16px;font-size:16px;font-family:'Noto Sans KR',sans-serif;text-align:center;width:200px;background:#fff;color:var(--text);outline:none}
+.name-input:focus{border-color:var(--coral)}
+.stamp{font-size:48px;animation:stampIn .3s ease;display:inline-block}
+@keyframes stampIn{0%{transform:scale(2) rotate(-10deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.heart-float{position:fixed;pointer-events:none;font-size:24px;animation:floatUp 1.2s ease forwards;z-index:9999}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-120px) scale(0.5)}}
+.top-bar{background:#fff;padding:14px 20px 12px;position:sticky;top:0;z-index:100;border-bottom:1px solid #F5F5F5;display:flex;align-items:center;gap:10px}
+.back-btn{background:none;border:none;font-size:22px;cursor:pointer;padding:4px;border-radius:8px;transition:.15s;line-height:1}
+.back-btn:hover{background:#F5F5F5}
+.top-title{font-size:16px;font-weight:700;color:var(--text)}
+.knowledge-card{background:#fff;border-radius:var(--radius2);margin:0 16px 12px;padding:18px 20px;border:1.5px solid #F0F0F0;box-shadow:var(--shadow2)}
+.kc-icon{font-size:28px;margin-bottom:8px}
+.kc-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.kc-body{font-size:14px;line-height:1.7;color:var(--text2)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+
+<!-- ─── 홈 화면 ─── -->
+<div id="screen-home" class="screen active">
+  <div style="background:linear-gradient(160deg,#FFF0F0,#FFF5E6 60%,#F0FAFF);padding:40px 20px 30px;text-align:center">
+    <div style="font-size:72px;margin-bottom:10px;animation:float 3s ease-in-out infinite">🧠</div>
+    <h1 style="font-size:26px;font-weight:900;color:#2D2D2D;line-height:1.3;margin-bottom:6px">나를 지키는<br><span style="color:var(--coral)">건강 지식 퀴즈</span></h1>
+    <p style="font-size:14px;color:var(--text3);margin-bottom:24px">재미있게 배우고, 나를 돌보자 💕</p>
+    <div style="display:inline-flex;align-items:center;gap:6px;background:#fff;border-radius:20px;padding:8px 16px;box-shadow:var(--shadow2)">
+      <span style="font-size:13px;color:var(--text2)">✨ 셀프체크 → 상식 → 퀴즈 → 선서</span>
+    </div>
+  </div>
+  <div style="padding:24px 16px 0">
+    <div style="display:flex;align-items:center;gap:14px;background:#fff;border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px">
+      <div class="char" style="background:linear-gradient(135deg,#FFE0E0,#FFB3B3)">🐥</div>
+      <div>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:2px">퀴즈 도우미 <b style="color:var(--coral)">삐약이</b></p>
+        <p style="font-size:15px;font-weight:500;line-height:1.5">안녕! 나랑 같이 건강 상식 퀴즈 풀어볼래?<br>총 10개 주제 중에 하나 골라봐 🎯</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('screen-selfcheck')" style="margin-bottom:12px">🚀 시작하기!</button>
+    <div style="text-align:center;font-size:12px;color:var(--text3)">셀프체크부터 시작해서 주제를 골라요</div>
+  </div>
+</div>
+
+<!-- ─── 셀프체크 화면 ─── -->
+<div id="screen-selfcheck" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goTo('screen-home')">←</button>
+    <span class="top-title">💭 나는 어떨까? 셀프체크</span>
+  </div>
+  <div style="padding:16px 16px 0">
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px">
+      <div class="char" style="background:linear-gradient(135deg,#FFE0E0,#FFB3B3);width:52px;height:52px;font-size:28px">🐥</div>
+      <div class="talk-box" style="flex:1">
+        먼저 솔직하게 체크해봐!<br>정답/오답 없어, 그냥 <b>나를 아는 시간</b> ☺️<br>
+        <span style="font-size:13px;color:var(--text3)">예/아니오 중 하나를 눌러봐</span>
+      </div>
+    </div>
+    <div class="bubble" style="padding:4px 16px">
+      <div id="check-list"></div>
+    </div>
+    <div id="check-result" style="display:none;margin-bottom:14px">
+      <div style="background:var(--coral-light);border-radius:var(--radius2);padding:18px;text-align:center">
+        <div id="check-result-icon" style="font-size:48px;margin-bottom:8px"></div>
+        <div id="check-result-msg" class="result-msg"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="submitCheck()" id="check-submit-btn" style="margin:8px 0 12px">체크 완료! ✅</button>
+    <button class="btn btn-secondary" id="check-next-btn" onclick="goTo('screen-topics')" style="display:none;margin-bottom:24px">주제 선택하러 가기 →</button>
+  </div>
+</div>
+
+<!-- ─── 주제 선택 ─── -->
+<div id="screen-topics" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goTo('screen-selfcheck')">←</button>
+    <span class="top-title">📚 주제 선택</span>
+  </div>
+  <div style="padding:14px 16px 8px">
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">
+      <div class="char" style="background:linear-gradient(135deg,#FFE0E0,#FFB3B3);width:48px;height:48px;font-size:24px">🐥</div>
+      <div class="talk-box" style="flex:1;font-size:14px">어떤 주제 퀴즈 풀고 싶어?<br>10개 중에 <b>1개만</b> 골라! 👇</div>
+    </div>
+  </div>
+  <div class="topic-grid" id="topic-grid"></div>
+  <div style="padding:16px">
+    <button class="btn btn-primary" onclick="startTopic()" id="start-topic-btn" disabled style="opacity:.5">주제를 선택해줘! 🎯</button>
+  </div>
+</div>
+
+<!-- ─── 상식 화면 ─── -->
+<div id="screen-knowledge" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goTo('screen-topics')">←</button>
+    <span class="top-title" id="know-title">📖 상식 먼저!</span>
+  </div>
+  <div style="padding:12px 16px 8px">
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">
+      <div class="char" style="background:linear-gradient(135deg,#FFE0E0,#FFB3B3);width:48px;height:48px;font-size:24px">🐥</div>
+      <div class="talk-box" style="flex:1;font-size:14px">퀴즈 전에 이것만 읽어봐!<br>여기서 <b>다 나와</b> ㅋㅋ 힌트임 😏</div>
+    </div>
+  </div>
+  <div id="knowledge-list"></div>
+  <div style="padding:12px 16px 24px">
+    <button class="btn btn-primary" onclick="startQuiz()">다 읽었어! 퀴즈 시작 🚀</button>
+  </div>
+</div>
+
+<!-- ─── 퀴즈 화면 ─── -->
+<div id="screen-quiz" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="if(confirm('퀴즈를 그만할까요?')) goTo('screen-topics')">←</button>
+    <span class="top-title" id="quiz-topic-title">퀴즈</span>
+    <span style="margin-left:auto;font-size:13px;color:var(--text3)" id="quiz-counter">1/10</span>
+  </div>
+  <div style="padding:12px 16px 0">
+    <div class="progress-bar"><div class="progress-fill" id="quiz-progress" style="width:10%"></div></div>
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">
+      <div class="char" style="background:linear-gradient(135deg,#FFE0E0,#FFB3B3);width:44px;height:44px;font-size:22px;flex-shrink:0">🐥</div>
+      <div id="quiz-char-say" class="talk-box" style="flex:1;font-size:14px">자, 시작해볼까? 💪</div>
+    </div>
+    <div class="bubble" style="padding:18px 18px 8px">
+      <div class="q-num" id="q-num">Q1</div>
+      <div class="q-text" id="q-text"></div>
+      <div id="opts-wrap"></div>
+      <div class="feedback-box" id="feedback-box"></div>
+    </div>
+    <button class="btn btn-primary" id="next-q-btn" onclick="nextQuestion()" style="display:none;margin-top:14px">다음 문제 →</button>
+  </div>
+</div>
+
+<!-- ─── 결과 화면 ─── -->
+<div id="screen-result" class="screen">
+  <div class="top-bar">
+    <span class="top-title">🏆 퀴즈 결과</span>
+  </div>
+  <div style="padding:24px 16px 0;text-align:center">
+    <div class="score-circle">
+      <div class="score-num" id="score-num">0</div>
+      <div class="score-total">/ 10점</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;margin:20px 0 16px">
+      <div class="char" style="background:linear-gradient(135deg,#FFE0E0,#FFB3B3);width:52px;height:52px;font-size:26px;flex-shrink:0">🐥</div>
+      <div class="talk-box" style="flex:1;text-align:left" id="result-talk"></div>
+    </div>
+    <div class="bubble" style="text-align:left">
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px">틀린 문제 복습 📝</div>
+      <div id="wrong-list" style="font-size:13px;color:var(--text2);line-height:1.8"></div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('screen-pledge')" style="margin:16px 0 8px">마지막 선서하러 가기 ✍️</button>
+    <button class="btn btn-secondary" onclick="goTo('screen-topics')" style="margin-bottom:24px">다른 주제 도전하기</button>
+  </div>
+</div>
+
+<!-- ─── 선서 화면 ─── -->
+<div id="screen-pledge" class="screen">
+  <div class="top-bar">
+    <span class="top-title">✍️ 나와의 약속</span>
+  </div>
+  <div style="padding:16px 16px 0">
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">
+      <div class="char" style="background:linear-gradient(135deg,#FFE0E0,#FFB3B3);width:52px;height:52px;font-size:26px;flex-shrink:0">🐥</div>
+      <div class="talk-box" style="flex:1">
+        퀴즈까지 다 풀었으면<br>이제 <b>진짜 중요한 것</b>! 💛<br>
+        <span style="font-size:13px;color:var(--text3)">아래 선서문을 읽고 서명해봐</span>
+      </div>
+    </div>
+    <div class="bubble" style="background:linear-gradient(135deg,#FFF9F5,#FFF0F5);border:2px solid #FFD0D0">
+      <div style="text-align:center;font-size:20px;font-weight:900;color:var(--coral);margin-bottom:14px">📜 나와의 선서문</div>
+      <div id="pledge-list"></div>
+      <div class="sign-box">
+        <div style="font-size:13px;color:var(--text3);margin-bottom:10px">📝 이름을 쓰고 서명 완료!</div>
+        <input type="text" id="name-input" class="name-input" placeholder="이름 입력" oninput="checkName()">
+        <div id="stamp-wrap" style="margin-top:12px;display:none">
+          <div class="stamp">✅</div>
+          <div style="font-size:14px;font-weight:700;color:var(--coral);margin-top:4px">선서 완료!</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="completePledge()" id="pledge-btn" disabled style="opacity:.5;margin:14px 0 24px">선서합니다! 🙏</button>
+  </div>
+</div>
+
+<!-- ─── 완료 화면 ─── -->
+<div id="screen-done" class="screen">
+  <div style="padding:24px 16px 0;text-align:center">
+    <div style="font-size:60px;margin-bottom:8px;animation:float 3s ease-in-out infinite">🎉</div>
+    <h2 style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px">완료! 최고야!</h2>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:16px">건강 지킴이 인증서가 발급됐어 💕</p>
+
+    <!-- 인증서 -->
+    <div id="certificate-wrap" style="margin:0 0 18px;position:relative">
+      <canvas id="cert-canvas" style="width:100%;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,0.13)"></canvas>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px">
+      <div class="char" style="background:linear-gradient(135deg,#FFE0E0,#FFB3B3);width:44px;height:44px;font-size:22px;flex-shrink:0">🐥</div>
+      <div class="talk-box" style="flex:1;text-align:left;font-size:14px">
+        오늘부터 <b id="done-name" style="color:var(--coral)">너</b>는 건강 지킴이야!<br>
+        인증서 꾹 눌러서 저장해봐 📸
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="downloadCert()" style="margin-bottom:10px">💾 인증서 저장하기</button>
+    <!-- QR 공유 섹션 -->
+    <div id="qr-section" style="background:#fff;border-radius:16px;border:2px solid #FFE0E0;padding:18px 16px;margin-bottom:14px;text-align:center">
+      <div style="font-size:14px;font-weight:700;color:#E05555;margin-bottom:4px">📲 친구한테 공유하기</div>
+      <div style="font-size:12px;color:#999;margin-bottom:14px">QR코드를 찍으면 이 앱을 바로 실행할 수 있어!</div>
+      <div id="qr-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:10px">
+        <canvas id="qr-canvas" style="border-radius:10px;border:1.5px solid #FFD0D0"></canvas>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:12px;color:#aaa;margin-bottom:8px">또는 이 파일을 직접 공유해도 돼 😊</div>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="goTo('screen-home')" style="margin-bottom:28px">처음으로 돌아가기 🏠</button>
+  </div>
+</div>
+
+<script>
+const TOPICS=[
+  {id:'energy',icon:'⚡',name:'에너지 드링크\n오남용 예방',tag:'건강',
+   knowledge:[
+     {icon:'⚡',title:'에너지 드링크란?',body:'카페인, 타우린, 비타민 B군이 들어간 음료야. 피로회복 효과가 있지만 과도하게 마시면 위험해!'},
+     {icon:'☕',title:'카페인 하루 권장량',body:'청소년(13~18세)의 하루 카페인 권장량은 최대 125mg이야. 에너지 드링크 1캔(250ml)에 80mg 이상 들어있어!'},
+     {icon:'💔',title:'과다섭취 시 부작용',body:'심장 두근거림, 불안감, 수면 장애, 고혈압이 생길 수 있어. 심한 경우 부정맥도!'},
+     {icon:'🎮',title:'왜 청소년이 위험할까?',body:'뇌와 몸이 아직 발달 중이라 카페인에 더 민감해. 성인보다 부작용이 크게 나타날 수 있어.'},
+     {icon:'🚫',title:'이때는 절대 NO!',body:'운동 전·후, 취침 전 6시간 이내, 다른 카페인 음료랑 함께는 정말 위험해!'},
+   ],
+   quiz:[
+     {q:'청소년(13~18세)의 하루 카페인 권장량은?',opts:['50mg','125mg','200mg','300mg'],ans:1,fb:'맞아! 125mg이 청소년 하루 권장량이야. 에너지 드링크 1.5캔 정도야!'},
+     {q:'에너지 드링크 과다섭취 시 나타날 수 없는 증상은?',opts:['심장 두근거림','졸음','불안감','불면증'],ans:1,fb:'맞아! 카페인은 각성효과라 졸음이 오히려 줄어들어. 수면 장애가 생겨!'},
+     {q:'에너지 드링크를 마시면 안 되는 시간대는?',opts:['아침 기상 후','점심 식후','취침 6시간 이내','오후 3시'],ans:2,fb:'맞아! 잠들기 6시간 전에는 마시면 안 돼. 수면을 방해해!'},
+     {q:'에너지 드링크에 주로 들어있는 성분이 아닌 것은?',opts:['카페인','타우린','비타민B','아스피린'],ans:3,fb:'맞아! 아스피린은 진통제야. 에너지 드링크 성분이 아니야!'},
+     {q:'운동 전에 에너지 드링크를 마시면?',opts:['집중력이 높아져서 좋다','심박수 상승으로 위험할 수 있다','운동 효과가 2배된다','아무런 영향 없다'],ans:1,fb:'맞아! 운동 중 심박수가 높아진 상태에서 카페인까지 더하면 위험해!'},
+     {q:'에너지 드링크 1캔(250ml)에 든 카페인은 대략?',opts:['20mg','50mg','80mg 이상','200mg 이상'],ans:2,fb:'맞아! 보통 80~100mg 이상! 청소년 권장량의 60% 이상이야.'},
+     {q:'청소년이 에너지 드링크에 더 취약한 이유는?',opts:['맛이 좋아서','뇌와 몸이 아직 발달 중이라','가격이 싸서','마트에서 쉽게 살 수 있어서'],ans:1,fb:'맞아! 성장 중인 몸은 카페인 영향을 더 크게 받아!'},
+     {q:'에너지 드링크와 함께 마시면 위험한 음료는?',opts:['물','우유','커피','주스'],ans:2,fb:'맞아! 커피에도 카페인이 있어. 함께 마시면 카페인 과다섭취가 돼!'},
+     {q:'카페인 과다섭취 시 심장에 미치는 영향은?',opts:['심박수 감소','혈압 저하','부정맥 가능성','아무 영향 없음'],ans:2,fb:'맞아! 카페인은 심박수를 높이고 심한 경우 부정맥을 유발할 수 있어!'},
+     {q:'에너지 드링크 대신 피로 회복에 좋은 것은?',opts:['더 많이 자기','물과 충분한 수면','다른 에너지 드링크','아무것도 없다'],ans:1,fb:'맞아! 결국 피로 해결법은 충분한 수면과 물이야! 근본 해결이 최고 💕'},
+   ]},
+  {id:'smoke',icon:'🚭',name:'흡연 예방',tag:'건강',
+   knowledge:[
+     {icon:'🚬',title:'담배 속 유해물질',body:'담배 연기에는 7,000가지 이상의 화학물질이 있어. 그 중 70여 가지가 암을 일으켜!'},
+     {icon:'🧠',title:'니코틴 중독',body:'니코틴은 뇌에 직접 작용해 의존성을 만들어. 청소년은 성인보다 더 빠르게 중독돼!'},
+     {icon:'💸',title:'담배의 경제적 피해',body:'하루 1갑 흡연 시 연간 약 180만 원 소비. 20년이면 3,600만 원이야!'},
+     {icon:'🫁',title:'간접흡연도 위험해',body:'주변에서 담배 연기를 마시는 것만으로도 발암물질에 노출돼. 가족도 위험해!'},
+     {icon:'💪',title:'금연의 효과',body:'금연 20분 후 심박수 감소, 12시간 후 혈중 산소 정상화, 2주 후 폐 기능 향상!'},
+   ],
+   quiz:[
+     {q:'담배 연기 속 화학물질은 몇 가지 이상?',opts:['100가지','1,000가지','7,000가지','100,000가지'],ans:2,fb:'맞아! 7,000가지 이상이야. 그 중 70여 가지가 발암물질이야!'},
+     {q:'니코틴이 중독을 일으키는 이유는?',opts:['맛이 좋아서','뇌에 직접 작용해서','냄새가 좋아서','친구가 피워서'],ans:1,fb:'맞아! 니코틴은 뇌의 보상 회로를 자극해 의존성을 만들어!'},
+     {q:'금연 후 20분 안에 일어나는 변화는?',opts:['폐 기능 완전 회복','심박수 감소','체중 감소','피부 회복'],ans:1,fb:'맞아! 금연 20분 만에 심박수와 혈압이 낮아지기 시작해!'},
+     {q:'청소년 흡연이 더 위험한 이유는?',opts:['담배 가격이 비싸서','성인보다 중독이 빨라서','담배가 작아서','법이 엄격해서'],ans:1,fb:'맞아! 청소년 뇌는 니코틴에 더 빨리 중독돼!'},
+     {q:'하루 1갑 흡연 시 연간 담배 비용은?',opts:['약 50만원','약 100만원','약 180만원','약 500만원'],ans:2,fb:'맞아! 엄청나지? 그 돈으로 여행을 갈 수 있어!'},
+     {q:'간접흡연의 위험성은?',opts:['전혀 없다','직접 흡연의 1% 수준','발암물질에 노출된다','냄새만 맡는다'],ans:2,fb:'맞아! 간접흡연도 발암물질에 그대로 노출돼!'},
+     {q:'금연 12시간 후 일어나는 변화는?',opts:['폐암 완치','혈중 산소 정상화','체중 감소','뼈가 튼튼해짐'],ans:1,fb:'맞아! 12시간 후면 혈중 일산화탄소가 빠지고 산소 수치가 정상화돼!'},
+     {q:'담배 속 발암물질 수는?',opts:['10여 가지','30여 가지','70여 가지','200여 가지'],ans:2,fb:'맞아! 70여 가지 발암물질이 들어있어!'},
+     {q:'흡연이 몸에 주는 피해가 아닌 것은?',opts:['폐암','치아 착색','키가 커짐','잇몸 질환'],ans:2,fb:'맞아! 흡연은 오히려 성장을 방해해. 키가 커지는 건 말이 안 되지!'},
+     {q:'금연을 돕는 방법이 아닌 것은?',opts:['운동하기','친구와 수다 떨기','전자담배로 바꾸기','금연 앱 사용하기'],ans:2,fb:'맞아! 전자담배도 니코틴이 들어있어서 금연에 도움이 안 돼!'},
+   ]},
+  {id:'alcohol',icon:'🍺',name:'음주 예방',tag:'건강',
+   knowledge:[
+     {icon:'🧠',title:'청소년 음주, 뇌에 치명적',body:'술은 뇌 발달에 직접적 영향을 줘. 청소년기 음주는 기억력, 학습능력 저하를 일으켜!'},
+     {icon:'💊',title:'알코올 중독은 질병',body:'알코올 의존증은 병이야. 청소년은 성인보다 훨씬 빠르게 의존성이 생겨!'},
+     {icon:'⚖️',title:'법적으로 금지',body:'19세 미만 음주는 불법! 미성년자에게 술을 판 가게도 처벌받아.'},
+     {icon:'😴',title:'수면 방해',body:'술을 마시면 잠이 빨리 들지만 수면의 질이 떨어져. 다음 날 더 피곤해!'},
+     {icon:'👫',title:'또래 압력 거절법',body:'"괜찮아, 나 안 마셔" "운전해야 해서" "약 먹고 있어" 등 자연스럽게 거절하는 연습!'},
+   ],
+   quiz:[
+     {q:'청소년 음주가 특히 위험한 신체 기관은?',opts:['손발','뇌','머리카락','손톱'],ans:1,fb:'맞아! 발달 중인 뇌에 알코올이 심각한 영향을 줘!'},
+     {q:'한국에서 음주가 법적으로 허용되는 나이는?',opts:['16세','18세','19세','20세'],ans:2,fb:'맞아! 만 19세부터 합법적으로 음주할 수 있어!'},
+     {q:'술을 마신 후 수면에 미치는 영향은?',opts:['수면의 질이 높아진다','빨리 잠들지만 수면 질이 떨어진다','꿈을 더 많이 꾼다','아무 영향 없다'],ans:1,fb:'맞아! 알코올은 깊은 수면을 방해해서 자도 피곤해!'},
+     {q:'알코올 의존증에 대한 설명으로 맞는 것은?',opts:['의지로 극복 가능한 습관','치료가 필요한 질병','게으른 사람만 걸린다','성인만 걸린다'],ans:1,fb:'맞아! 알코올 의존증은 전문적 치료가 필요한 뇌 질환이야!'},
+     {q:'청소년 음주가 학습에 미치는 영향은?',opts:['집중력 향상','기억력 및 학습능력 저하','아무 영향 없다','오히려 창의력 증가'],ans:1,fb:'맞아! 알코올은 해마(기억 담당 뇌 부위)에 손상을 줘!'},
+     {q:'미성년자에게 술을 판 가게는?',opts:['아무런 처벌 없음','경고만 받음','법적 처벌 대상','조용히 해결 가능'],ans:2,fb:'맞아! 미성년자 주류 판매는 법적으로 처벌받아!'},
+     {q:'알코올이 청소년 뇌에 미치는 영향이 아닌 것은?',opts:['기억력 저하','학습능력 저하','시력 향상','뇌 발달 방해'],ans:2,fb:'맞아! 알코올은 시력을 향상시키지 않아. 오히려 시야를 흐리게 해!'},
+     {q:'청소년이 성인보다 알코올 의존증이 빠른 이유는?',opts:['술을 더 많이 마셔서','뇌가 아직 발달 중이라','몸이 작아서','돈이 없어서'],ans:1,fb:'맞아! 발달 중인 뇌는 알코올에 더 취약해!'},
+     {q:'음주 후 운전을 하면?',opts:['반응속도가 빨라진다','위험하지 않다','사고 위험이 매우 높다','법적으로 괜찮다'],ans:2,fb:'맞아! 음주운전은 살인과 같아. 절대 안 돼!'},
+     {q:'친구가 술을 권할 때 가장 좋은 거절법은?',opts:['화내며 거절','자연스럽게 "나 안 마셔"라고 말하기','그냥 마신다','자리를 피한다'],ans:1,fb:'맞아! 자연스럽고 확실하게 거절하는 게 제일 좋아!'},
+   ]},
+  {id:'phone',icon:'📱',name:'스마트폰\n과의존 예방',tag:'생활',
+   knowledge:[
+     {icon:'📱',title:'과의존이란?',body:'스마트폰 사용을 스스로 조절하지 못하고, 없으면 불안하거나 일상생활에 문제가 생기는 상태야.'},
+     {icon:'👁️',title:'눈 건강 주의',body:'화면과의 적정 거리는 30~40cm. 20분 사용 후 20초간 6m 거리 보기 (20-20-20 규칙)!'},
+     {icon:'🌙',title:'잠들기 전 스마트폰은 NO',body:'블루라이트가 멜라토닌 분비를 억제해. 잠들기 1시간 전에는 스마트폰을 내려놔!'},
+     {icon:'🧠',title:'뇌에도 영향',body:'짧은 영상에 익숙해지면 긴 글 읽기나 집중력이 떨어져. 도파민 회로에도 영향을 줘!'},
+     {icon:'💚',title:'디지털 디톡스',body:'하루 1~2시간 스마트폰 없는 시간을 만들어봐. 책 읽기, 산책, 대화로 채워보자!'},
+   ],
+   quiz:[
+     {q:'스마트폰 과의존의 증상이 아닌 것은?',opts:['없으면 불안하다','조절이 안 된다','일상생활에 문제가 생긴다','사용 시간이 줄어든다'],ans:3,fb:'맞아! 과의존은 사용 시간이 오히려 늘어나고 조절이 안 되는 상태야!'},
+     {q:'20-20-20 규칙에서 두 번째 20은?',opts:['20분 휴식','20초간 다른 곳 보기','20m 거리 보기','20cm 거리 유지'],ans:1,fb:'맞아! 20분 사용 후 20초 동안 20피트(약 6m) 거리를 보는 거야!'},
+     {q:'취침 전 스마트폰이 수면에 영향 주는 이유는?',opts:['소리가 시끄러워서','블루라이트가 멜라토닌을 억제해서','너무 무거워서','전자파 때문에'],ans:1,fb:'맞아! 블루라이트가 수면 호르몬인 멜라토닌 분비를 방해해!'},
+     {q:'스마트폰 화면과의 적정 거리는?',opts:['10cm','20cm','30~40cm','50cm 이상'],ans:2,fb:'맞아! 30~40cm 거리를 유지하는 게 눈 건강에 좋아!'},
+     {q:'디지털 디톡스란?',opts:['스마트폰을 수리하는 것','의도적으로 스마트폰 사용을 줄이는 것','새 폰을 사는 것','인터넷을 빠르게 하는 것'],ans:1,fb:'맞아! 디지털 기기 없는 시간을 의도적으로 만드는 거야!'},
+     {q:'짧은 영상을 많이 보면 생기는 문제는?',opts:['독서 속도 향상','집중력 저하','기억력 향상','창의력 증가'],ans:1,fb:'맞아! 짧은 자극에 익숙해지면 긴 집중이 어려워져!'},
+     {q:'잠들기 전 스마트폰을 내려놓아야 하는 시간은?',opts:['10분 전','30분 전','1시간 전','5시간 전'],ans:2,fb:'맞아! 최소 1시간 전에는 스마트폰을 내려놓는 게 좋아!'},
+     {q:'스마트폰 과의존 예방법이 아닌 것은?',opts:['정해진 시간만 사용하기','알림 줄이기','밥 먹으면서도 보기','앱 사용시간 확인하기'],ans:2,fb:'맞아! 밥 먹으면서 보는 건 과의존을 악화시켜!'},
+     {q:'스마트폰이 뇌에 미치는 영향으로 맞는 것은?',opts:['기억력 향상','도파민 회로에 영향','집중력 향상','스트레스 해소'],ans:1,fb:'맞아! 스마트폰 알림이 도파민 분비를 자극해 의존성을 만들어!'},
+     {q:'스마트폰 대신 할 수 있는 좋은 활동은?',opts:['독서','유튜브 더 보기','릴스 보기','게임하기'],ans:0,fb:'맞아! 독서는 스마트폰 없이 할 수 있는 최고의 활동이야!'},
+   ]},
+  {id:'diet',icon:'🥗',name:'올바른 식습관',tag:'건강',
+   knowledge:[
+     {icon:'🍽️',title:'균형 잡힌 식사',body:'탄수화물, 단백질, 지방, 비타민, 미네랄을 골고루 먹는 게 중요해. 한 가지만 먹으면 안 돼!'},
+     {icon:'⏰',title:'아침 식사의 중요성',body:'아침을 먹으면 집중력이 높아지고 오전 활동 에너지가 생겨. 뇌 활동에 포도당이 필수야!'},
+     {icon:'🚫',title:'과도한 다이어트의 위험',body:'극단적인 식이제한은 영양 불균형, 성장 방해, 섭식 장애로 이어질 수 있어!'},
+     {icon:'💧',title:'물 충분히 마시기',body:'하루 8잔(약 2L) 이상 물을 마셔야 해. 청량음료는 당분이 많아서 물 대신 안 돼!'},
+     {icon:'🍕',title:'인스턴트 식품 주의',body:'나트륨, 포화지방, 첨가물이 많아. 자주 먹으면 혈압 상승, 비만, 피부 트러블이 생겨!'},
+   ],
+   quiz:[
+     {q:'균형 잡힌 식사를 위해 필요한 영양소가 아닌 것은?',opts:['탄수화물','단백질','비타민','인공색소'],ans:3,fb:'맞아! 인공색소는 영양소가 아니야. 오히려 몸에 안 좋을 수 있어!'},
+     {q:'아침 식사가 중요한 이유는?',opts:['체중 감소','뇌 활동에 포도당 공급','저녁 식욕 감소','소화가 잘 됨'],ans:1,fb:'맞아! 뇌는 포도당을 주 에너지원으로 사용해. 아침이 중요해!'},
+     {q:'하루 권장 물 섭취량은?',opts:['1잔','4잔','8잔 이상','20잔'],ans:2,fb:'맞아! 하루 8잔, 약 2L 이상의 물이 필요해!'},
+     {q:'극단적인 다이어트의 위험성이 아닌 것은?',opts:['영양 불균형','성장 방해','섭식 장애','근육 강화'],ans:3,fb:'맞아! 극단적 다이어트는 근육을 오히려 분해시켜!'},
+     {q:'인스턴트 식품을 자주 먹으면 생기는 문제가 아닌 것은?',opts:['혈압 상승','비만','피부 트러블','시력 향상'],ans:3,fb:'맞아! 인스턴트 식품이 시력을 향상시키지는 않아!'},
+     {q:'청량음료를 물 대신 마시면 안 되는 이유는?',opts:['색이 진해서','당분이 많아서','차갑기 때문에','냄새가 강해서'],ans:1,fb:'맞아! 청량음료의 당분이 혈당을 급격히 올려!'},
+     {q:'단백질이 풍부한 음식은?',opts:['사탕','콜라','닭가슴살','과자'],ans:2,fb:'맞아! 닭가슴살은 고단백 저지방 식품의 대표야!'},
+     {q:'비타민C가 풍부한 과일은?',opts:['바나나','키위','수박','포도'],ans:1,fb:'맞아! 키위는 오렌지보다 비타민C가 많아! 면역력에 좋아.'},
+     {q:'올바른 식습관이 아닌 것은?',opts:['천천히 씹어 먹기','규칙적인 식사','야식 자주 먹기','채소 골고루 먹기'],ans:2,fb:'맞아! 야식은 소화 장애와 비만의 원인이야!'},
+     {q:'청소년기에 특히 중요한 영양소는?',opts:['알코올','나트륨','칼슘','인공감미료'],ans:2,fb:'맞아! 성장기에 칼슘은 뼈와 치아 형성에 필수야!'},
+   ]},
+  {id:'mental',icon:'🧘',name:'정신건강\n자기돌봄',tag:'마음',
+   knowledge:[
+     {icon:'😰',title:'스트레스란?',body:'몸과 마음이 긴장 상태가 되는 거야. 적당한 스트레스는 동기부여가 되지만, 과도하면 건강에 해로워!'},
+     {icon:'💬',title:'이야기하는 게 치료',body:'힘든 감정을 혼자 담아두지 마. 믿을 수 있는 사람에게 말하는 것만으로도 기분이 나아져!'},
+     {icon:'🏃',title:'운동이 최고의 항우울제',body:'운동하면 세로토닌, 도파민이 분비돼. 30분 걷기만 해도 기분이 확 달라져!'},
+     {icon:'📔',title:'감정 일기 쓰기',body:'오늘 느낀 감정을 적어보자. 감정을 인식하고 표현하는 것 자체가 마음 건강에 좋아!'},
+     {icon:'🆘',title:'도움 요청하기',body:'너무 힘들면 혼자 견디지 마. 청소년 상담 전화 1388 (24시간, 무료)로 전화해!'},
+   ],
+   quiz:[
+     {q:'스트레스가 완전히 없으면 어떻게 될까?',opts:['최상의 상태','동기부여 저하','건강이 좋아짐','공부가 잘 됨'],ans:1,fb:'맞아! 적당한 스트레스는 오히려 동기부여가 돼. 완전히 없으면 무기력해질 수 있어!'},
+     {q:'운동이 기분을 좋게 하는 이유는?',opts:['피곤해져서','세로토닌, 도파민이 분비돼서','살이 빠져서','친구를 만나서'],ans:1,fb:'맞아! 운동하면 행복 호르몬이 나와. 그래서 운동 후 기분이 좋아지는 거야!'},
+     {q:'청소년 상담 전화번호는?',opts:['112','119','1388','1393'],ans:2,fb:'맞아! 1388은 24시간 무료 청소년 상담 전화야!'},
+     {q:'감정 일기 쓰기의 효과가 아닌 것은?',opts:['감정 인식 도움','마음 건강에 좋음','즉시 친구 사귀기','스트레스 해소'],ans:2,fb:'맞아! 감정 일기는 내면 탐구에 좋지만 직접 친구 사귀는 데 즉각 도움은 안 줘!'},
+     {q:'힘든 감정을 다루는 좋은 방법이 아닌 것은?',opts:['믿는 사람에게 말하기','운동하기','혼자 오래 담아두기','상담 받기'],ans:2,fb:'맞아! 혼자 오래 담아두면 더 힘들어져. 표현이 중요해!'},
+     {q:'30분 걷기의 효과로 맞는 것은?',opts:['키가 자란다','기분이 좋아진다','배가 고파진다','눈이 좋아진다'],ans:1,fb:'맞아! 30분 유산소 운동만으로도 기분이 확 달라져!'},
+     {q:'정신건강에 좋은 습관이 아닌 것은?',opts:['충분한 수면','규칙적인 운동','새벽 2시까지 게임','감사 일기 쓰기'],ans:2,fb:'맞아! 수면 부족은 정신건강에 큰 영향을 줘!'},
+     {q:'우울한 기분을 즉시 달래는 방법으로 좋은 것은?',opts:['방에만 있기','좋아하는 음악 듣기','SNS에서 남과 비교','더 많이 자기'],ans:1,fb:'맞아! 좋아하는 음악은 기분 전환에 즉각적으로 도움이 돼!'},
+     {q:'정신건강에 대한 올바른 태도는?',opts:['약해서 힘든 거다','도움 요청은 창피한 일','마음 건강도 몸 건강만큼 중요하다','혼자 해결해야 한다'],ans:2,fb:'맞아! 마음 건강은 몸 건강만큼 중요해. 도움 요청은 용기 있는 행동이야!'},
+     {q:'세로토닌을 높이는 활동이 아닌 것은?',opts:['햇빛 쬐기','운동하기','밤새 게임하기','친구와 대화'],ans:2,fb:'맞아! 밤새 게임은 수면을 방해해서 세로토닌을 오히려 낮춰!'},
+   ]},
+  {id:'bully',icon:'🤝',name:'학교폭력 예방',tag:'안전',
+   knowledge:[
+     {icon:'⚡',title:'학교폭력의 종류',body:'신체폭력, 언어폭력, 사이버폭력, 따돌림, 금품갈취 등 다양한 형태가 있어. 모두 폭력이야!'},
+     {icon:'📢',title:'신고가 중요해',body:'학교폭력을 목격하면 방관하지 마. Wee클래스 상담, 학교폭력신고센터 117로 신고해!'},
+     {icon:'💪',title:'피해자의 용기',body:'피해를 당하면 혼자 해결하려 하지 마. 믿을 수 있는 어른에게 반드시 알려야 해!'},
+     {icon:'🌐',title:'사이버폭력이란?',body:'SNS, 게임, 메시지 등으로 하는 욕설, 따돌림, 개인정보 유출도 학교폭력이야!'},
+     {icon:'🤝',title:'방관자도 책임 있어',body:'폭력을 보고 아무것도 안 하는 방관자도 간접적으로 폭력에 가담한 거야!'},
+   ],
+   quiz:[
+     {q:'학교폭력 신고 전화번호는?',opts:['112','119','117','118'],ans:2,fb:'맞아! 117은 학교폭력 신고센터야. 24시간 운영해!'},
+     {q:'사이버폭력에 해당하지 않는 것은?',opts:['단톡방 욕설','게임에서 따돌리기','SNS에서 칭찬','개인정보 유출'],ans:2,fb:'맞아! 칭찬은 폭력이 아니야. 온라인에서도 친절하게 대하자!'},
+     {q:'학교폭력 목격 시 올바른 행동은?',opts:['모른 척 지나간다','폭력에 동참한다','어른에게 알린다','나중에 혼자 해결한다'],ans:2,fb:'맞아! 방관하지 않고 어른에게 알리는 게 최선이야!'},
+     {q:'학교폭력 피해 시 가장 중요한 행동은?',opts:['혼자 참는다','복수한다','믿을 수 있는 어른에게 알린다','학교를 그만둔다'],ans:2,fb:'맞아! 혼자 해결하려다 더 힘들어질 수 있어. 반드시 알려야 해!'},
+     {q:'방관자에 대한 설명으로 맞는 것은?',opts:['아무 책임 없다','폭력에 간접 가담한 것','영웅적 행동','피해자가 아니다'],ans:1,fb:'맞아! 보고도 아무것도 안 하는 방관도 문제야!'},
+     {q:'학교폭력의 종류가 아닌 것은?',opts:['따돌림','금품갈취','건강한 토론','언어폭력'],ans:2,fb:'맞아! 건강한 토론은 폭력이 아니야!'},
+     {q:'Wee클래스는 무엇을 하는 곳인가?',opts:['체육 수업','학생 상담 공간','급식실','도서관'],ans:1,fb:'맞아! Wee클래스는 학교 내 학생 상담 공간이야!'},
+     {q:'피해 학생을 도울 수 있는 행동은?',opts:['모른 척','함께 피한다','위로하고 신고 도움주기','폭력에 동참'],ans:2,fb:'맞아! 피해 학생 곁에 있어주고 신고를 도와주는 게 최선이야!'},
+     {q:'학교폭력 예방에 가장 좋은 문화는?',opts:['강한 자가 이기는 문화','서로 존중하는 문화','침묵하는 문화','방관하는 문화'],ans:1,fb:'맞아! 서로 존중하는 분위기가 폭력을 예방해!'},
+     {q:'언어폭력이 신체폭력보다 괜찮다는 말은?',opts:['맞다, 상처가 없다','아니다, 정신적 상처가 크다','맞다, 법으로 처벌 안 된다','아니다, 더 심한 폭력이다'],ans:1,fb:'맞아! 언어폭력도 법적 처벌 대상이고 정신적 상처가 오래가!'},
+   ]},
+  {id:'sns',icon:'🌐',name:'SNS·미디어\n리터러시',tag:'디지털',
+   knowledge:[
+     {icon:'🔍',title:'가짜 뉴스 판별법',body:'출처 확인, 작성 날짜 확인, 다른 뉴스와 비교하기. 공유 전에 한 번 더 생각해!'},
+     {icon:'🔒',title:'개인정보 보호',body:'이름, 학교, 주소, 전화번호를 SNS에 올리면 안 돼. 낯선 사람의 친구 추가도 조심!'},
+     {icon:'📸',title:'SNS 비교 심리',body:'SNS는 다들 좋은 것만 올려. 비교하다 보면 자존감이 낮아져. 있는 그대로의 나를 사랑해!'},
+     {icon:'⏰',title:'정보 확인 후 공유',body:'가짜 뉴스를 공유하면 나도 전파자가 돼. 확실하지 않은 정보는 공유하지 마!'},
+     {icon:'💜',title:'디지털 발자국',body:'온라인에 남긴 기록은 영구적으로 남을 수 있어. 올리기 전에 한 번 더 생각하자!'},
+   ],
+   quiz:[
+     {q:'가짜 뉴스를 판별하는 방법이 아닌 것은?',opts:['출처 확인','날짜 확인','조회수가 높으면 믿기','다른 뉴스와 비교'],ans:2,fb:'맞아! 조회수가 높아도 가짜일 수 있어. 꼭 출처를 확인해!'},
+     {q:'SNS에 올리면 안 되는 정보는?',opts:['좋아하는 음식','나의 학교 이름과 주소','좋아하는 음악','오늘 날씨'],ans:1,fb:'맞아! 개인정보는 범죄에 악용될 수 있어!'},
+     {q:'SNS의 게시물이 자존감에 미치는 영향은?',opts:['항상 자존감을 높인다','비교 심리로 자존감이 낮아질 수 있다','아무 영향 없다','항상 긍정적이다'],ans:1,fb:'맞아! 다른 사람의 좋은 면만 보여주는 SNS와 비교하면 힘들어!'},
+     {q:'디지털 발자국이란?',opts:['스마트폰 무게','온라인 활동 기록','인터넷 속도','배터리 사용량'],ans:1,fb:'맞아! 온라인에서 남긴 모든 흔적이야. 영구적으로 남을 수 있어!'},
+     {q:'가짜 뉴스를 공유하면?',opts:['괜찮다, 나는 모른다','나도 가짜 뉴스 전파자가 된다','법적 문제 없다','재미있는 일이다'],ans:1,fb:'맞아! 공유도 확산에 책임이 있어. 확인 후 공유해!'},
+     {q:'온라인에서 낯선 사람의 친구 추가 요청을 받으면?',opts:['무조건 수락','조심하고 거절하거나 무시','부모님께 허락받기','실제 만남 약속'],ans:1,fb:'맞아! 온라인 낯선 사람은 조심해야 해. 거절해도 괜찮아!'},
+     {q:'미디어 리터러시란?',opts:['영어 읽기 능력','미디어를 비판적으로 이해하고 활용하는 능력','TV 수리 능력','유튜브 만들기'],ans:1,fb:'맞아! 미디어 정보를 비판적으로 읽는 능력이야!'},
+     {q:'게시물 올리기 전 해야 할 것은?',opts:['빨리 올린다','많은 해시태그를 단다','한 번 더 생각한다','친구에게 자랑한다'],ans:2,fb:'맞아! 한 번 더 생각! 지워도 흔적이 남을 수 있어!'},
+     {q:'SNS 게시물이 실제와 다른 이유는?',opts:['거짓말을 해서','좋은 것만 선별해서 올려서','카메라가 이상해서','친구가 도와줘서'],ans:1,fb:'맞아! SNS는 가장 좋아 보이는 순간만 올려. 현실과 달라!'},
+     {q:'개인정보 보호에서 가장 중요한 것은?',opts:['이쁜 사진 올리기','공유 전에 한 번 더 생각하기','팔로워 늘리기','좋아요 받기'],ans:1,fb:'맞아! 공유 전 한 번 더 생각하는 게 개인정보 보호의 시작이야!'},
+   ]},
+  {id:'exercise',icon:'🏃',name:'운동·신체활동',tag:'건강',
+   knowledge:[
+     {icon:'💪',title:'청소년 운동 권장량',body:'WHO에서 청소년은 하루 60분 이상 중강도 운동을 권장해. 주 3회 이상 근력 운동도 좋아!'},
+     {icon:'🦴',title:'뼈 건강에 운동',body:'청소년기는 골밀도가 가장 많이 쌓이는 시기야. 지금 운동하면 골다공증 예방에 도움돼!'},
+     {icon:'😊',title:'운동과 정신건강',body:'운동하면 스트레스 해소, 자신감 향상, 집중력 강화 효과가 있어. 최고의 기분 전환이야!'},
+     {icon:'🏠',title:'실내에서도 운동',body:'집에서도 스트레칭, 홈트, 계단 오르기로 충분히 운동 가능해. 기구 없어도 돼!'},
+     {icon:'📺',title:'앉아있는 시간 줄이기',body:'오래 앉아있으면 심혈관 질환 위험이 높아져. 매 1시간마다 5분씩 움직이자!'},
+   ],
+   quiz:[
+     {q:'WHO 권장 청소년 하루 운동량은?',opts:['20분','40분','60분 이상','120분 이상'],ans:2,fb:'맞아! 하루 60분 이상 중강도 운동이 권장돼!'},
+     {q:'청소년기에 운동이 특히 중요한 이유는?',opts:['살을 빼기 위해','골밀도가 가장 많이 쌓이는 시기','친구 사귀기','시간 때우기'],ans:1,fb:'맞아! 청소년기 골밀도 형성이 평생 뼈 건강을 결정해!'},
+     {q:'운동이 정신건강에 주는 이점이 아닌 것은?',opts:['스트레스 해소','자신감 향상','집중력 강화','외로움 증가'],ans:3,fb:'맞아! 운동은 외로움을 늘리지 않아. 오히려 사회성이 좋아져!'},
+     {q:'집에서 할 수 있는 운동이 아닌 것은?',opts:['스트레칭','홈트','수영','계단 오르기'],ans:2,fb:'맞아! 수영은 수영장이 필요해. 집에선 스트레칭, 홈트가 가능해!'},
+     {q:'오래 앉아있으면 생기는 문제는?',opts:['집중력 향상','심혈관 질환 위험 증가','소화가 잘 됨','뼈가 강해짐'],ans:1,fb:'맞아! 장시간 앉아있으면 혈액 순환이 안 좋아져!'},
+     {q:'매 1시간마다 권장되는 행동은?',opts:['잠자기','5분 움직이기','운동 1시간 추가','스마트폰 보기'],ans:1,fb:'맞아! 매 시간 5분씩 움직이는 것만으로도 건강에 큰 도움이 돼!'},
+     {q:'주 3회 이상 권장되는 운동은?',opts:['누워있기','근력 운동','TV 보기','공부'],ans:1,fb:'맞아! 근력 운동은 주 3회 이상이 권장돼!'},
+     {q:'청소년에게 좋은 운동이 아닌 것은?',opts:['줄넘기','수영','과도한 다이어트 운동','달리기'],ans:2,fb:'맞아! 과도한 다이어트 목적의 운동은 성장에 악영향을 줘!'},
+     {q:'운동 후 회복에 중요한 것은?',opts:['즉시 다시 운동','충분한 수면과 영양','카페인 섭취','스마트폰 보기'],ans:1,fb:'맞아! 운동 후 충분한 수면과 영양이 근육 회복을 도와!'},
+     {q:'스트레칭의 효과가 아닌 것은?',opts:['유연성 향상','부상 예방','시력 향상','혈액순환 도움'],ans:2,fb:'맞아! 스트레칭이 시력을 향상시키지는 않아!'},
+   ]},
+  {id:'sleep',icon:'😴',name:'수면·생활리듬',tag:'생활',
+   knowledge:[
+     {icon:'🌙',title:'청소년 권장 수면',body:'청소년은 하루 8~10시간 수면이 필요해. 성인보다 더 자야 뇌가 제대로 발달해!'},
+     {icon:'⏰',title:'규칙적인 수면 패턴',body:'매일 같은 시간에 자고 일어나면 체내 시계가 맞아. 주말에도 너무 다르게 자지 마!'},
+     {icon:'📵',title:'수면 위생',body:'자기 전 스마트폰, 밝은 빛 피하기. 어둡고 조용한 환경이 숙면에 좋아!'},
+     {icon:'🧪',title:'수면 부족의 영향',body:'집중력 저하, 기억력 감소, 면역력 약화, 감정 조절 어려움이 생겨. 성적에도 영향!'},
+     {icon:'🌞',title:'낮잠 활용법',body:'낮잠은 20~30분이 이상적이야. 그 이상 자면 오히려 밤잠을 방해해!'},
+   ],
+   quiz:[
+     {q:'청소년 하루 권장 수면 시간은?',opts:['4~6시간','6~7시간','8~10시간','12시간 이상'],ans:2,fb:'맞아! 청소년은 8~10시간이 필요해. 성인(7~8시간)보다 더!'},
+     {q:'규칙적인 수면 패턴이 중요한 이유는?',opts:['더 많이 자려고','체내 시계를 맞추기 위해','주말에 더 자려고','꿈을 꾸기 위해'],ans:1,fb:'맞아! 체내 시계를 맞추면 잠들기 쉽고 개운하게 일어날 수 있어!'},
+     {q:'이상적인 낮잠 시간은?',opts:['5분','20~30분','1시간','2시간'],ans:1,fb:'맞아! 20~30분이 피로 회복에 최적이야. 그 이상은 밤잠을 방해해!'},
+     {q:'수면 부족이 주는 영향이 아닌 것은?',opts:['집중력 저하','기억력 감소','면역력 향상','감정 조절 어려움'],ans:2,fb:'맞아! 수면 부족은 면역력을 높이지 않아. 오히려 낮아져!'},
+     {q:'숙면에 좋은 환경은?',opts:['밝고 시끄러운 환경','어둡고 조용한 환경','춥고 건조한 환경','화면 빛이 있는 환경'],ans:1,fb:'맞아! 어둡고 조용하고 적당히 서늘한 환경이 최고야!'},
+     {q:'자기 전 스마트폰을 피해야 하는 이유는?',opts:['배터리 아끼려고','블루라이트가 수면을 방해해서','소리가 시끄러워서','데이터 아끼려고'],ans:1,fb:'맞아! 블루라이트가 수면 호르몬을 억제해!'},
+     {q:'주말에 평일보다 훨씬 늦게 자고 늦게 일어나면?',opts:['좋다, 충분히 쉬는 것','체내 시계가 흐트러진다','더 건강해진다','집중력이 높아진다'],ans:1,fb:'맞아! 이른바 "소셜 시차"가 생겨. 월요일에 더 피곤한 이유야!'},
+     {q:'수면이 뇌에 하는 역할은?',opts:['뇌를 완전히 쉬게 함','기억 정리와 뇌 발달 돕기','아무 역할 없음','뇌를 성장시킴'],ans:1,fb:'맞아! 자는 동안 뇌가 낮에 배운 것을 정리하고 저장해!'},
+     {q:'커피를 마시면 잠이 안 오는 이유는?',opts:['맛이 강해서','카페인이 수면 신호를 차단해서','너무 뜨거워서','향이 강해서'],ans:1,fb:'맞아! 카페인이 아데노신(수면 신호 물질)을 차단해!'},
+     {q:'잠이 안 올 때 좋은 방법은?',opts:['스마트폰 보기','밝은 불 켜기','가벼운 스트레칭','에너지 드링크 마시기'],ans:2,fb:'맞아! 가벼운 스트레칭이나 명상이 긴장을 풀어줘서 잠드는 데 도움이 돼!'},
+   ]}
+];
+
+const SELF_CHECK=[
+  {q:'에너지 드링크나 카페인 음료를 하루 1개 이상 마셔'},
+  {q:'밤 12시 이후에 잠드는 날이 일주일에 3번 이상이야'},
+  {q:'스마트폰 사용을 스스로 조절하기 힘들어'},
+  {q:'아침 식사를 자주 거르는 편이야'},
+  {q:'스트레스를 받아도 혼자 해결하려고 해'},
+  {q:'운동을 일주일에 1번도 안 해'},
+  {q:'SNS에서 다른 사람과 비교해서 기분이 안 좋은 적 있어'},
+  {q:'수면 시간이 하루 6시간 미만인 경우가 많아'},
+];
+
+const CHECK_RESULTS=[
+  {max:2,icon:'😊',msg:'오! 생활 습관이 꽤 건강해!\n지금처럼만 유지해봐 💚'},
+  {max:4,icon:'😅',msg:'조금씩 신경 써야 할 부분이 있어!\n함께 상식 퀴즈 풀면서 배워보자 📚'},
+  {max:6,icon:'😰',msg:'생활 습관 개선이 필요해!\n퀴즈로 배우고 오늘부터 조금씩 바꿔보자 💪'},
+  {max:8,icon:'😱',msg:'건강 생활 습관이 많이 필요해!\n퀴즈 앱이랑 함께 하나씩 바꿔보자!\n지금 시작이 최고야 🌟'},
+];
+
+const PLEDGE_TEXTS=[
+  '나는 내 몸과 마음을 소중히 여기겠습니다.',
+  '오늘 배운 건강 상식을 일상에서 실천하겠습니다.',
+  '힘들 때 혼자 감당하지 않고 도움을 요청하겠습니다.',
+  '나와 주변 친구들의 건강을 함께 챙기겠습니다.',
+  '작은 것부터 하나씩, 오늘부터 시작하겠습니다! 💪',
+];
+
+const RESULT_TALKS=[
+  {min:0,max:4,msg:'에구... 아직 공부가 더 필요해 ㅠㅠ\n상식 카드 다시 읽고 또 도전해봐! 💪'},
+  {min:5,max:7,msg:'오! 절반 이상 맞았어!\n조금만 더 공부하면 만점 갈 수 있어 🔥'},
+  {min:8,max:9,msg:'와! 거의 다 맞았어! 대단한데?\n완벽에 거의 다가갔어 ✨'},
+  {min:10,max:10,msg:'만점!!!!! 진짜 천재야!!! 🏆\n이제 친구들에게도 알려줘 💕'},
+];
+
+const CHAR_SAYS=['자 시작이야! 집중해 💪','잘 하고 있어! 파이팅 🔥','어? 이거 알지? 😏','상식 카드에 있었는데... 👀','절반 왔어! 조금만 더!','이건 좀 어렵지? 🤔','거의 다 왔어! 힘내!','마지막 직전이야! 집중!','마지막 두 문제야!','마지막 문제야! 최선을 다해! 🏁'];
+
+let selTopic=null,curQ=0,score=0,wrongs=[],checks={};
+
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function initCheck(){
+  document.getElementById('check-list').innerHTML=SELF_CHECK.map((c,i)=>`
+    <div class="check-item">
+      <span class="check-num">${i+1}.</span>
+      <div style="flex:1">
+        <div class="check-q">${c.q}</div>
+        <div class="check-opts">
+          <button class="check-opt" onclick="setCheck(${i},true,this)">예 😅</button>
+          <button class="check-opt" onclick="setCheck(${i},false,this)">아니오 😊</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function setCheck(i,val,btn){
+  checks[i]=val;
+  btn.parentElement.querySelectorAll('.check-opt').forEach(o=>o.classList.remove('sel-yes','sel-no'));
+  btn.classList.add(val?'sel-yes':'sel-no');
+}
+
+function submitCheck(){
+  const yesCount=Object.values(checks).filter(v=>v).length;
+  const res=CHECK_RESULTS.find(r=>yesCount<=r.max)||CHECK_RESULTS[CHECK_RESULTS.length-1];
+  const rd=document.getElementById('check-result');
+  rd.style.display='block';
+  document.getElementById('check-result-icon').textContent=res.icon;
+  document.getElementById('check-result-msg').textContent=res.msg;
+  document.getElementById('check-submit-btn').style.display='none';
+  document.getElementById('check-next-btn').style.display='block';
+  rd.scrollIntoView({behavior:'smooth'});
+}
+
+function initTopics(){
+  document.getElementById('topic-grid').innerHTML=TOPICS.map(t=>`
+    <div class="topic-card" onclick="selectTopic('${t.id}',this)">
+      <div class="topic-icon">${t.icon}</div>
+      <div class="topic-name">${t.name}</div>
+      <div class="topic-tag">${t.tag}</div>
+    </div>`).join('');
+}
+
+function selectTopic(id,el){
+  selTopic=TOPICS.find(t=>t.id===id);
+  document.querySelectorAll('.topic-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  const btn=document.getElementById('start-topic-btn');
+  btn.disabled=false; btn.style.opacity='1';
+  btn.textContent=`${selTopic.icon} ${selTopic.name.replace('\n',' ')} 시작!`;
+}
+
+function startTopic(){
+  if(!selTopic)return;
+  document.getElementById('know-title').textContent=`📖 ${selTopic.name.replace('\n',' ')} 상식`;
+  document.getElementById('knowledge-list').innerHTML=selTopic.knowledge.map(k=>`
+    <div class="knowledge-card">
+      <div class="kc-icon">${k.icon}</div>
+      <div class="kc-title">${k.title}</div>
+      <div class="kc-body">${k.body}</div>
+    </div>`).join('');
+  goTo('screen-knowledge');
+}
+
+function startQuiz(){
+  curQ=0; score=0; wrongs=[];
+  document.getElementById('quiz-topic-title').textContent=`${selTopic.icon} ${selTopic.name.replace('\n',' ')}`;
+  loadQuestion();
+  goTo('screen-quiz');
+}
+
+function loadQuestion(){
+  const q=selTopic.quiz[curQ];
+  document.getElementById('q-num').textContent=`Q${curQ+1}`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('quiz-counter').textContent=`${curQ+1}/10`;
+  document.getElementById('quiz-progress').style.width=`${(curQ+1)*10}%`;
+  document.getElementById('quiz-char-say').textContent=CHAR_SAYS[curQ];
+  const letters=['①','②','③','④'];
+  document.getElementById('opts-wrap').innerHTML=q.opts.map((o,i)=>`
+    <button class="opt-btn" onclick="answerQ(${i},this)">
+      <span class="opt-letter">${letters[i]}</span>${o}
+    </button>`).join('');
+  document.getElementById('feedback-box').className='feedback-box';
+  document.getElementById('feedback-box').textContent='';
+  document.getElementById('next-q-btn').style.display='none';
+}
+
+function answerQ(idx,btn){
+  const q=selTopic.quiz[curQ];
+  document.querySelectorAll('.opt-btn').forEach(b=>b.classList.add('disabled'));
+  const fb=document.getElementById('feedback-box');
+  if(idx===q.ans){
+    score++;
+    btn.classList.add('correct');
+    btn.querySelector('.opt-letter').textContent='✓';
+    fb.className='feedback-box show feedback-correct';
+    fb.textContent='🎉 정답! '+q.fb;
+    spawnHearts(btn);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn')[q.ans].classList.add('correct');
+    document.querySelectorAll('.opt-btn')[q.ans].querySelector('.opt-letter').textContent='✓';
+    fb.className='feedback-box show feedback-wrong';
+    fb.textContent='😢 아쉽! '+q.fb;
+    wrongs.push({num:curQ+1,q:q.q,correct:q.opts[q.ans]});
+  }
+  document.getElementById('next-q-btn').style.display='block';
+}
+
+function nextQuestion(){
+  curQ++;
+  if(curQ>=10) showResult();
+  else loadQuestion();
+}
+
+function showResult(){
+  document.getElementById('score-num').textContent=score;
+  const talk=RESULT_TALKS.find(r=>score>=r.min&&score<=r.max);
+  document.getElementById('result-talk').textContent=talk?talk.msg:'수고했어! 💕';
+  const wl=document.getElementById('wrong-list');
+  wl.innerHTML=wrongs.length===0
+    ?'<span style="color:#4CAF50;font-weight:700">🎉 모두 맞았어! 완벽해!</span>'
+    :wrongs.map(w=>`<div style="margin-bottom:8px">❌ Q${w.num}. ${w.q}<br><span style="color:var(--coral)">✅ 정답: ${w.correct}</span></div>`).join('');
+  goTo('screen-result');
+}
+
+function initPledge(){
+  document.getElementById('pledge-list').innerHTML=PLEDGE_TEXTS.map((t,i)=>`
+    <div class="pledge-item">
+      <div class="pledge-num">${i+1}</div>
+      <div class="pledge-text">${t}</div>
+    </div>`).join('');
+}
+
+function checkName(){
+  const v=document.getElementById('name-input').value.trim();
+  const btn=document.getElementById('pledge-btn');
+  document.getElementById('stamp-wrap').style.display=v.length>0?'block':'none';
+  btn.disabled=v.length===0; btn.style.opacity=v.length>0?'1':'.5';
+}
+
+function completePledge(){
+  const name=document.getElementById('name-input').value.trim()||'건강 지킴이';
+  const topic=selTopic?selTopic.name.replace('\n',' '):'건강 퀴즈';
+  document.getElementById('done-name').textContent=name;
+  spawnConfetti();
+  setTimeout(()=>{
+    goTo('screen-done');
+    setTimeout(()=>{
+      drawCertificate(name,topic,score);
+      generateQR();
+    },120);
+  },600);
+}
+
+function generateQR(){
+  const canvas=document.getElementById('qr-canvas');
+  if(!canvas||typeof QRCode==='undefined') return;
+  const url=window.location.href.split('?')[0];
+  QRCode.toCanvas(canvas, url, {
+    width:180,
+    margin:2,
+    color:{dark:'#E05555',light:'#FFFDF8'}
+  }, function(err){
+    if(err) console.warn('QR error:',err);
+  });
+}
+
+function drawCertificate(name,topic,quizScore){
+  const canvas=document.getElementById('cert-canvas');
+  const dpr=window.devicePixelRatio||1;
+  const W=680,H=460;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  // 배경 크림색
+  ctx.fillStyle='#FFFDF8';
+  roundRect(ctx,0,0,W,H,20);
+  ctx.fill();
+
+  // 바깥 테두리 이중선
+  ctx.strokeStyle='#FF6B6B';
+  ctx.lineWidth=3;
+  roundRect(ctx,10,10,W-20,H-20,14);
+  ctx.stroke();
+  ctx.strokeStyle='#FFB3B3';
+  ctx.lineWidth=1.5;
+  roundRect(ctx,17,17,W-34,H-34,10);
+  ctx.stroke();
+
+  // 상단 핑크 배너
+  ctx.fillStyle='#FF6B6B';
+  roundRect(ctx,10,10,W-20,70,14,true,false);
+  ctx.fill();
+
+  // 배너 텍스트
+  ctx.fillStyle='#FFFFFF';
+  ctx.font='bold 15px "Noto Sans KR", sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('🏅  건강 지킴이 인증서  🏅', W/2, 52);
+
+  // 별 장식 (상단 양쪽)
+  drawStar(ctx,50,45,14,'#FFE0B2');
+  drawStar(ctx,W-50,45,14,'#FFE0B2');
+
+  // 메인 아이콘
+  ctx.font='64px serif';
+  ctx.textAlign='center';
+  ctx.fillText('🧠', W/2, 148);
+
+  // 이름
+  ctx.fillStyle='#2D2D2D';
+  ctx.font='bold 28px "Noto Sans KR", sans-serif';
+  ctx.fillText(name, W/2, 192);
+
+  // 이름 밑줄
+  const nameW=ctx.measureText(name).width;
+  ctx.strokeStyle='#FF6B6B';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(W/2-nameW/2-10,198);
+  ctx.lineTo(W/2+nameW/2+10,198);
+  ctx.stroke();
+
+  // 본문 텍스트
+  ctx.fillStyle='#555';
+  ctx.font='16px "Noto Sans KR", sans-serif';
+  ctx.fillText('위 사람은 나를 지키는 건강 지식 퀴즈를 완료하고', W/2, 228);
+
+  ctx.font='bold 16px "Noto Sans KR", sans-serif';
+  ctx.fillStyle='#E05555';
+  ctx.fillText(`[ ${topic} ]`, W/2, 254);
+
+  ctx.font='16px "Noto Sans KR", sans-serif';
+  ctx.fillStyle='#555';
+  ctx.fillText('주제에서 나와의 선서를 완료하였기에 이 인증서를 수여합니다.', W/2, 278);
+
+  // 점수 배지
+  const bx=W/2-60, by=296, bw=120, bh=38;
+  ctx.fillStyle='#FFF0F0';
+  ctx.strokeStyle='#FF6B6B';
+  ctx.lineWidth=1.5;
+  roundRect(ctx,bx,by,bw,bh,19);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#E05555';
+  ctx.font='bold 15px "Noto Sans KR", sans-serif';
+  ctx.fillText(`퀴즈 점수 : ${quizScore}점 / 10점`, W/2, by+25);
+
+  // 날짜
+  const today=new Date();
+  const dateStr=`${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+  ctx.fillStyle='#999';
+  ctx.font='13px "Noto Sans KR", sans-serif';
+  ctx.fillText(dateStr, W/2, 358);
+
+  // 도장 원
+  ctx.save();
+  ctx.strokeStyle='#FF6B6B';
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.arc(W/2,390,34,0,Math.PI*2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(W/2,390,28,0,Math.PI*2);
+  ctx.stroke();
+  ctx.fillStyle='#FF6B6B';
+  ctx.font='bold 13px "Noto Sans KR", sans-serif';
+  ctx.fillText('건강', W/2, 387);
+  ctx.fillText('지킴이', W/2, 403);
+  ctx.restore();
+
+  // 하단 하트 장식
+  const hearts=['💕','⭐','💛','✨','💕'];
+  ctx.font='18px serif';
+  hearts.forEach((h,i)=>{
+    ctx.fillText(h, 100+i*120, 445);
+  });
+
+  // 하단 라인
+  ctx.strokeStyle='#FFB3B3';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(40,426); ctx.lineTo(W-40,426);
+  ctx.stroke();
+}
+
+function roundRect(ctx,x,y,w,h,r,topOnly=false,full=true){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);
+  if(topOnly){
+    ctx.lineTo(x+w,y+h);
+    ctx.lineTo(x,y+h);
+  } else {
+    ctx.lineTo(x+w,y+h-r);
+    ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+    ctx.lineTo(x+r,y+h);
+    ctx.arcTo(x,y+h,x,y+h-r,r);
+  }
+  ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+function drawStar(ctx,cx,cy,r,color){
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  for(let i=0;i<5;i++){
+    const a=Math.PI/2+i*Math.PI*2/5;
+    const b=a+Math.PI/5;
+    if(i===0) ctx.moveTo(cx+r*Math.cos(a),cy-r*Math.sin(a));
+    else ctx.lineTo(cx+r*Math.cos(a),cy-r*Math.sin(a));
+    ctx.lineTo(cx+(r*0.4)*Math.cos(b),cy-(r*0.4)*Math.sin(b));
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function downloadCert(){
+  const canvas=document.getElementById('cert-canvas');
+  const name=document.getElementById('done-name').textContent||'건강지킴이';
+  canvas.toBlob(function(blob){
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download='건강지킴이_인증서_'+name+'.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  },'image/png');
+}
+
+function spawnHearts(el){
+  const rect=el.getBoundingClientRect();
+  ['❤️','✨','⭐'].forEach((e,i)=>{
+    const h=document.createElement('div');
+    h.className='heart-float'; h.textContent=e;
+    h.style.left=(rect.left+rect.width/2+i*20-20)+'px';
+    h.style.top=(rect.top+window.scrollY)+'px';
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),1200);
+  });
+}
+
+function spawnConfetti(){
+  const emojis=['🎉','⭐','💕','✨','🎊','💛'];
+  for(let i=0;i<12;i++){
+    setTimeout(()=>{
+      const h=document.createElement('div');
+      h.className='heart-float'; h.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      h.style.left=Math.random()*80+10+'%';
+      h.style.top=Math.random()*30+20+'%';
+      h.style.fontSize='28px';
+      document.body.appendChild(h);
+      setTimeout(()=>h.remove(),1200);
+    },i*80);
+  }
+}
+
+initCheck(); initTopics(); initPledge();
+</script>
+</body>
+</html>
