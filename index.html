@@ -180,7 +180,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
       <div class="yt-wrap" id="d-yt-box">
         <div class="yt-ph" id="d-yt-ph">
           <div class="yt-pb"><div class="yt-arr"></div></div>
-          <div style="font-size:12px;color:var(--tx2)">▶ 누르면 유튜브에서 재생돼요</div>
+          <div style="font-size:12px;color:var(--tx2)">터치하면 유튜브에서 재생돼요</div>
+          <div style="font-size:11px;color:var(--tx3);margin-top:2px">보고 나서 뒤로가기 하면 앱으로 돌아와요</div>
           <div id="d-yt-id" style="font-size:10px;color:var(--tx3);background:var(--sf2);padding:3px 10px;border-radius:6px;border:1px solid var(--bd)"></div>
         </div>
         <iframe class="yt-fr" id="d-yt-fr"
@@ -195,6 +196,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
       <div style="flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900" id="d-qn">8</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">퀴즈 문제</div></div>
     </div>
     <button class="btn btn-p" id="d-cta" onclick="goKnow()">상식 카드 보기 →</button>
+    <button class="btn btn-g" onclick="startQuiz()" style="margin-bottom:8px">퀴즈 바로 풀기 →</button>
     <button class="btn btn-g" onclick="show('p-home')">주제 목록으로</button>
   </div>
 </div>
@@ -805,28 +807,13 @@ function playYT(videoId){
     alert('아직 영상이 등록되지 않았어요!');return;
   }
   _curVideoId=videoId;
-  const ov=document.getElementById('video-overlay');
-  const fr=document.getElementById('ov-frame');
-  fr.src='https://www.youtube-nocookie.com/embed/'+videoId
-    +'?autoplay=1&playsinline=1&rel=0&modestbranding=1';
-  ov.style.display='flex';
-  history.pushState({video:true},'');
-  window.addEventListener('popstate',_popVideo,{once:true});
+  window.open('https://www.youtube.com/shorts/'+videoId,'_blank');
 }
 function openYT(){
   window.open('https://www.youtube.com/shorts/'+_curVideoId,'_blank');
 }
-function _popVideo(){
-  closeVideo(true);
-}
-function closeVideo(fromPop){
-  const ov=document.getElementById('video-overlay');
-  const fr=document.getElementById('ov-frame');
-  fr.src='';
-  ov.style.display='none';
-  window.removeEventListener('popstate',_popVideo);
-  if(!fromPop) history.back();
-}
+function _popVideo(){}
+function closeVideo(){}
 
 /* ══ 셀프체크 ══ */
 function goCheck(stIdx){
