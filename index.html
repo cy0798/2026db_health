@@ -925,13 +925,11 @@ function nextQ(){
 }
 function backFromQuiz(){
   if(curQ===0){show('p-know');return;}
-  if(confirm('진행 내용이 사라져요. 상식카드로 돌아갈까요?'))show('p-know');
+  show('p-know');
 }
-function homeFromQuiz(){
-  if(confirm('홈으로 이동하면 퀴즈가 사라져요. 이동할까요?'))show('p-home');
-}
+function homeFromQuiz(){show('p-home');}
 function restartQ(){
-  if(confirm('처음부터 다시 풀까요?'))startQuiz();
+  startQuiz();
 }
 
 /* ══ 결과 ══ */
